@@ -21,13 +21,12 @@ gimp
 
 To deinstall:
 ```
-$ sudo rm /usr/local/bin/gimp
-$ sudo rm -rf /opt/gimp/
+$ sudo rm -rf /usr/local/bin/gimp /opt/gimp/
 ```
 
 As already written, this should work on any linux distribution. Except from the
-tar binary to extract it, there are no dependencies, not even a shell is
-needed.
+tar binary to extract it, there are no dependencies, not even a shell os
+specific libc flavour is needed.
 
 ## How does this work?
 Unpacking this examples basically extract the following:
@@ -36,9 +35,9 @@ Unpacking this examples basically extract the following:
 - /opt/gimp/rootfs/*
 
 Basically it is just a root filesystem where any user can chroot into via a
-statically compiled binary. Files in /opt/gimp/bin are all hard linked, to a
-small (~50kb) binary. All programns from the root file system can be accessed
-via theese binaries. For example.
+statically compiled binary. Files in /opt/gimp/bin are all hard linked, to the
+same, small (~50kb) binary. All programns from the root file system can be
+accessed via theese binaries. For example.
 ```
 $ /opt/gimp/sh
 # exit
