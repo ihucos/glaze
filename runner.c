@@ -122,6 +122,7 @@ int main(int argc, char* argv[]) {
         }
 
         char *env[UCHAR_MAX + 1];
+        env[UCHAR_MAX + 1] = NULL;
         unsigned char env_index = 0; // let it overflow if maximum is reached
         char *envname, *envval;
 

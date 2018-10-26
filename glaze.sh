@@ -22,7 +22,7 @@ cd "$tmp/root"
 for var in "$@"
 do
     mkdir -pm 755 ./usr/local/bin/
-    ln -s "/opt/$name/glaze" "./usr/local/bin/$var"
+    ln -s "/opt/$name/bin/$var" "./usr/local/bin/$var"
 done
 cd "$tmp/root"
 tar -czf "$outfile" .
