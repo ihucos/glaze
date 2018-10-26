@@ -6,7 +6,7 @@ Distribute containers/applications
 It's little code but actually many things. You can think of it as a
 distribution agnostic way to package applications for linux. The only
 requirement on the operating system is a `tar` binary. Another way to view it
-is as a standalone container runner or as an way to deploy containers. Let's
+is as a standalone container runner or as a way to deploy containers. Let's
 look at an example.
 
 ## Example
@@ -18,6 +18,13 @@ Congratulation, you installed gimp. Try to run it
 ```
 gimp
 ```
+
+To deinstall:
+```
+$ sudo rm /usr/local/bin/gimp
+$ sudo rm -rf /opt/gimp/
+```
+
 As already written, this should work on any linux distribution. Except from the
 tar binary to extract it, there are no dependencies, not even a shell is
 needed.
