@@ -25,7 +25,7 @@ $ sudo rm -rf /usr/local/bin/gimp /opt/gimp/
 ```
 
 As already written, this should work on any linux distribution. Except from the
-tar binary to extract it, there are no dependencies, not even a shell os
+tar binary to extract it, there are no dependencies, not even a shell or
 specific libc flavour is needed.
 
 ## How does this work?
