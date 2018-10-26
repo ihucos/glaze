@@ -86,7 +86,7 @@ void find_rootfs(char **rootfs) {
         if (NULL == (executable = realpath("/proc/self/exe", NULL)))
                 fatal("could not call realpath");
         char *executable_dir = dirname(executable);
-        if (-1 == asprintf(rootfs, "%s/rootfs", executable_dir))
+        if (-1 == asprintf(rootfs, "%s/../rootfs", executable_dir))
                 fatal("asprintf returned -1");
 }
 
@@ -135,7 +135,6 @@ int main(int argc, char* argv[]) {
                    envname = strtok(NULL, ":");
                 }
         }
-   
 
         char *always_export[] = {"TERM", "DISPLAY", "HOME", NULL};
         for (size_t i=0; always_export[i] != NULL; i++) {
