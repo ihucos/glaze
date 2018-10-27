@@ -50,6 +50,7 @@ a little bit like merging the container into your host operating system. The
 Check out the project
 ```
 $ git clone https://github.com/ihucos/glaze.git
+$ cd glaze
 ```
 Build or download a container, possibly installing your application there.
 ```
