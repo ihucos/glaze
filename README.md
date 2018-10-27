@@ -3,11 +3,10 @@
 Distribute containers/applications
 
 ## What is glaze?
-It's little code but actually many things. You can think of it as a
-distribution agnostic way to package applications for linux. The only
-requirement on the operating system is a `tar` binary. Another way to view it
-is as a standalone container runner or as a way to deploy containers. Let's
-look at an example.
+It's little code but actually many things. You can think of it as a Linux
+distribution agnostic way to package applications. The only requirement on the
+operating system is a `tar` binary. Another way to view it is as a standalone
+container runner or as a way to deploy containers. Let's look at an example.
 
 ## Example
 In the examples folder, there is a gimp package, to install it run.
@@ -59,6 +58,11 @@ $ (cd /tmp; wget http://dl-cdn.alpinelinux.org/alpine/v3.8/releases/x86_64/alpin
 Create the distributable glazed tar packaged
 ```
 $ ./glaze.sh /tmp/alpine-minirootfs-3.8.1-x86_64.tar.gz /tmp/alpine.glazed.tar.gz alpine zcat
+```
+
+## Compile
+```
+musl-gcc -static runner.c -o ./runner
 ```
 
 ## Status
