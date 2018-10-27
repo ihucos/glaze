@@ -1,6 +1,5 @@
 # glaze
-
-Distribute containers/applications
+Standalone containers / Universal distribution packages
 
 ## What is glaze?
 It's little code but actually many things. You can think of it as a Linux
