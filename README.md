@@ -18,15 +18,9 @@ Congratulation, you installed gimp. Try to run it
 ```
 gimp
 ```
-
-To deinstall:
-```
-$ sudo rm -rf /usr/local/bin/gimp /opt/gimp/
-```
-
 As already written, this should work on any linux distribution. Except from the
-tar binary to extract it, there are no dependencies, not even a shell or
-specific libc flavour is needed.
+tar binary to extract it, there are no dependencies, not even a shell is
+needed.
 
 ## How does this work?
 Unpacking this examples basically extract the following:
@@ -35,9 +29,9 @@ Unpacking this examples basically extract the following:
 - /opt/gimp/rootfs/*
 
 Basically it is just a root filesystem where any user can chroot into via a
-statically compiled binary. Files in /opt/gimp/bin are all hard linked, to the
-same, small (~50kb) binary. All programns from the root file system can be
-accessed via theese binaries. For example.
+statically compiled binary. Files in /opt/gimp/bin are all hard linked, to a
+small (~50kb) binary. All programns from the root file system can be accessed
+via theese binaries. For example.
 ```
 $ /opt/gimp/sh
 # exit
@@ -53,7 +47,18 @@ a little bit like merging the container into your host operating system. The
 /usr/local/bin/gimp file is just a symlink to /opt/gimp/bin/gimp.
 
 ## How to package
-TODO:
+Check out the project
+```
+$ git clone https://github.com/ihucos/glaze.git
+```
+Build or download an container, possibly with your application
+```
+$ (cd /tmp; wget http://dl-cdn.alpinelinux.org/alpine/v3.8/releases/x86_64/alpine-minirootfs-3.8.1-x86_64.tar.gz)
+```
+Create the distributable glazed tar packaged
+```
+$ ./glaze.sh /tmp/alpine-minirootfs-3.8.1-x86_64.tar.gz /tmp/alpine.glazed.tar.gz alpine zcat
+```
 
 ## Status
 Concept is nice, needs cleanup, currently prototype charachter.
