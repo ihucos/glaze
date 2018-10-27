@@ -51,7 +51,7 @@ Check out the project
 ```
 $ git clone https://github.com/ihucos/glaze.git
 ```
-Build or download an container, possibly with your application
+Build or download a container, possibly installing your application there.
 ```
 $ (cd /tmp; wget http://dl-cdn.alpinelinux.org/alpine/v3.8/releases/x86_64/alpine-minirootfs-3.8.1-x86_64.tar.gz)
 ```
