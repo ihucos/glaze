@@ -21,6 +21,23 @@ fprintf(stderr, "\n");\
 exit(1);\
 }
 
+void whitelist_env(char *env_name){
+        char *env_name_ptr, *env_item_ptr;
+        static size_t env_counter;
+
+        if (!env_name)
+                environ[env_counter++] = NULL;
+        else{
+                for(size_t i=env_counter; environ[i]; i++){
+                        for(
+                                        env_name_ptr = env_name, env_item_ptr = environ[i];
+                                        *env_name_ptr == *env_item_ptr && *env_name_ptr && *env_item_ptr;
+                                        env_name_ptr++, env_item_ptr++);
+                        if (*env_item_ptr == '=' && *env_name_ptr == 0)
+                                environ[env_counter++] = environ[i];
+                }
+        }
+}
 
 void singlemap_map(const char *file, uid_t id){ // assuming uid_t == gid_t
 	char *map;
@@ -92,6 +109,7 @@ void find_rootfs(char **rootfs) {
 
 
 int main(int argc, char* argv[]) {
+        setbuf(stdout, NULL);
 
         char *argv0 = strdup(argv[0]);
         char *progname = basename(argv0);
@@ -121,32 +139,22 @@ int main(int argc, char* argv[]) {
                         fatal("could not chdir")
         }
 
-        char *env[UCHAR_MAX + 1];
-        env[UCHAR_MAX + 1] = NULL;
-        unsigned char env_index = 0; // let it overflow if maximum is reached
-        char *envname, *envval;
-
+        char *token;
         char *str = getenv("PLASH_EXPORT");
-        if (str != NULL ) {
-                envname = strtok(str, ":");
-                while( envname != NULL ) {
-                   envval = getenv(envname);
-                   if (NULL != envval)
-                        asprintf(env + env_index++, "%s=%s", envname, envval);
-                   envname = strtok(NULL, ":");
+        if (str) {
+                str = strdup(str);
+                token = strtok(str, ":");
+                while(token) {
+                   whitelist_env(token);
+                   token = strtok(NULL, ":");
                 }
+                free(str);
         }
+        whitelist_env("TERM");
+        whitelist_env("DISPLAY");
+        whitelist_env("HOME");
+        whitelist_env(NULL);
 
-        char *always_export[] = {"TERM", "DISPLAY", "HOME", NULL};
-        for (size_t i=0; always_export[i] != NULL; i++) {
-                envname = always_export[i];
-                envval = getenv(envname);
-                if (NULL == envval)
-                        continue;
-                asprintf(env + env_index++, "%s=%s", envname, envval);
-        }
-        env[env_index++] = NULL;
-        argv[0] = progname;
-        if (-1 == execvpe(progname, argv, env))
-                fatal("could not exec %s", progname);
+        if (-1 == execlp("/usr/bin/env", "/usr/bin/env", NULL))
+                fatal("could not exec %s", "blah");
 }
