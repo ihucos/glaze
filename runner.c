@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
         rootfs_mount("/etc/resolv.conf",  rootfs, "/etc/resolv.conf");
 
         char *origpwd;
-        if (NULL == (origpwd = get_current_dir_name()))
+        if (!(origpwd = get_current_dir_name()))
             fatal("error calling get_current_dir_name")
 
         if (-1 == chroot(rootfs))
@@ -139,12 +139,11 @@ int main(int argc, char* argv[]) {
                         fatal("could not chdir")
         }
 
-        char *token;
-        char *str = getenv("PLASH_EXPORT");
-        if (str) {
+        char *token, *str;
+        if (str = getenv("PLASH_EXPORT")) {
                 str = strdup(str);
                 token = strtok(str, ":");
-                while(token) {
+                while(token){
                    whitelist_env(token);
                    token = strtok(NULL, ":");
                 }
