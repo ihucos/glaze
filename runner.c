@@ -10,6 +10,7 @@
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 #define fatal(...) {\
 fprintf(stderr, "%s", "glaze: ");\
@@ -22,7 +23,7 @@ exit(1);\
 }
 
 void whitelist_env(char *env_name){
-        char *env_name_ptr, *env_item_ptr;
+        char *n, *v;
         static size_t env_counter;
 
         if (!env_name)
@@ -30,40 +31,27 @@ void whitelist_env(char *env_name){
         else{
                 for(size_t i=env_counter; environ[i]; i++){
                         for(
-                                        env_name_ptr = env_name, env_item_ptr = environ[i];
-                                        *env_name_ptr == *env_item_ptr && *env_name_ptr && *env_item_ptr;
-                                        env_name_ptr++, env_item_ptr++);
-                        if (*env_item_ptr == '=' && *env_name_ptr == 0)
+                                        n = env_name, v = environ[i];
+                                        *n && *v && *n == *v;
+                                        n++, v++);
+                        if (*v == '=' && *n == 0)
                                 environ[env_counter++] = environ[i];
                 }
         }
 }
 
-void singlemap_map(const char *file, uid_t id){ // assuming uid_t == gid_t
-	char *map;
+int printf_file(char *file, char *format, ...){
         FILE *fd;
-
-	if (NULL == (fd = fopen(file, "w"))) {
-                fatal("could not open %s", file);
-        }
-        fprintf(fd, "0 %u 1\n", id);
-        if (errno != 0)
+	if (! (fd = fopen(file, "w")))
+                return 0;
+        va_list args;
+        va_start(args, format);
+        vfprintf(fd, format, args);
+        va_end(args);
+        if (errno)
                 fatal("could not write to %s", file);
         fclose(fd);
-}
-
-void singlemap_deny_setgroups() {
-	FILE *fd = fopen("/proc/self/setgroups", "w");
-	if (NULL == fd) {
-		if (errno != ENOENT) 
-                        fatal("could not open /proc/self/setgroups");
-        }
-        fprintf(fd, "deny");
-        if (errno != 0) {
-                fatal("could not write to /proc/self/setgroups");
-                exit(1);
-        }
-        fclose(fd);
+        return 1;
 }
 
 void singlemap_setup(){
@@ -75,10 +63,23 @@ void singlemap_setup(){
         } else {
                 if (-1 == unshare(CLONE_NEWNS | CLONE_NEWUSER))
                         fatal("could not unshare");
-                singlemap_deny_setgroups();
-                singlemap_map("/proc/self/uid_map", uid);
-                singlemap_map("/proc/self/gid_map", gid);
+
+                //
+                // write some file
+                //
+                if (!printf_file("/proc/self/setgroups", "deny")){
+                        if (errno != ENOENT) 
+                                fatal("could not open /proc/self/setgroups");
+                };
+                if (!printf_file("/proc/self/uid_map", "0 %u 1\n", uid)){
+                        fatal("could not open /proc/self/uid_map")
+                }
+                if (!printf_file("/proc/self/gid_map", "0 %u 1\n", gid)){
+                        fatal("could not open /proc/self/uid_map")
+                }
         }
+
+        //  make mount view private
         mount("none", "/", NULL, MS_REC|MS_PRIVATE, NULL);
 }
 
@@ -119,6 +120,7 @@ int main(int argc, char* argv[]) {
 
         singlemap_setup();
 
+
         rootfs_mount("/dev",  rootfs, "/dev");
         rootfs_mount("/home", rootfs, "/home");
         rootfs_mount("/proc", rootfs, "/proc");
@@ -154,6 +156,6 @@ int main(int argc, char* argv[]) {
         whitelist_env("HOME");
         whitelist_env(NULL);
 
-        if (-1 == execlp("/usr/bin/env", "/usr/bin/env", NULL))
+        if (-1 == execlp("/usr/bin/id", "/usr/bin/id", NULL))
                 fatal("could not exec %s", "blah");
 }
