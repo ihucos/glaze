@@ -30,14 +30,17 @@ exit(1);\
 }
 
 typedef struct {
-    size_t start;
-    size_t count;
+    size_t uid_start;
+    size_t uid_count;
+    size_t gid_start;
+    size_t gid_count;
 } subid_range_t;
 
-subid_range_t getidrange(
+void getidrange(
                 unsigned long id,
                 char *id_name,
-                const char *file) {
+                const char *file,
+                size_t *start, size_t *count) {
 
         char label[MAX_USERLEN];
         FILE *fd;
@@ -46,18 +49,18 @@ subid_range_t getidrange(
         if (NULL == (fd = fopen(file, "r")))
                 fatal("subid file not found")
 
-        while (3 == fscanf(fd, SCAN_ID_RANGE, label, &range.start, &range.count)){
+        while (3 == fscanf(fd, SCAN_ID_RANGE, label, start, count)){
                 errno = 0;
                 if ((strcmp(id_name, label) == 0) ||
                                 strtoul(label, NULL, 10) == id && errno == 0)
                         errno = 0;
-                        return range;
+                        return;
         }
         errno = 0;
-        fatal("subid range not found")
+        fatal("subid range not found\n")
 }
 
-int fullmap_run(subid_range_t uidrange, subid_range_t gidrange){
+int fullmap_run(subid_range_t range){
         int fd[2];
         pid_t child;
         char readbuffer[2];
@@ -82,8 +85,8 @@ int fullmap_run(subid_range_t uidrange, subid_range_t gidrange){
                         "newuidmap %lu %lu %lu %lu %lu %lu %lu\n" \
                         "newgidmap %lu %lu %lu %lu %lu %lu %lu\n" \
                         "exit 0\n",
-                        getpid(), 0, 1000, 1, 1, uidrange.start, uidrange.count,
-                        getpid(), 0, 1000, 1, 1, gidrange.start, gidrange.count)){
+                        getpid(), 0, 1000, 1, 1, range.uid_start, range.uid_count,
+                        getpid(), 0, 1000, 1, 1, range.gid_start, range.gid_count)){
                 fatal("could not send data to child with dprintf");
         }
         close(fd[0]);
@@ -105,11 +108,11 @@ int fullmap_setup() {
         if (NULL == pwent) {perror("uid not in passwd"); exit(1);}
         if (NULL == grent) {perror("gid not in db"); exit(1);}
 
-        subid_range_t uidrange, gidrange;
-        uidrange = getidrange(pwent->pw_uid, pwent->pw_name, "/etc/subuid");
-        gidrange = getidrange(grent->gr_gid, grent->gr_name, "/etc/subgid");
+        subid_range_t idrange;
+        getidrange(pwent->pw_uid, pwent->pw_name, "/etc/subuid", &idrange.uid_start, &idrange.uid_count);
+        getidrange(grent->gr_gid, grent->gr_name, "/etc/subgid", &idrange.gid_start, &idrange.gid_count);
 
-        fullmap_run(uidrange, gidrange);
+        fullmap_run(idrange);
         return 0;
 }
 
