@@ -34,28 +34,27 @@ typedef struct {
     size_t count;
 } subid_range_t;
 
-int fullmap_find(
+subid_range_t getidrange(
                 unsigned long id,
                 char *id_name,
-                const char *file,
-                subid_range_t *range) {
+                const char *file) {
 
         char label[MAX_USERLEN];
         FILE *fd;
+        subid_range_t range;
 
         if (NULL == (fd = fopen(file, "r")))
-                return -1;
+                fatal("subid file not found")
 
-        unsigned long a, b;
-        while (3 == fscanf(fd, SCAN_ID_RANGE, label, &range->start, &range->count)){
+        while (3 == fscanf(fd, SCAN_ID_RANGE, label, &range.start, &range.count)){
                 errno = 0;
                 if ((strcmp(id_name, label) == 0) ||
                                 strtoul(label, NULL, 10) == id && errno == 0)
                         errno = 0;
-                        return 0;
+                        return range;
         }
         errno = 0;
-        return -1;
+        fatal("subid range not found")
 }
 
 int fullmap_run(subid_range_t uidrange, subid_range_t gidrange){
@@ -105,14 +104,11 @@ int fullmap_setup() {
         struct group *grent = getgrgid(getgid());
         if (NULL == pwent) {perror("uid not in passwd"); exit(1);}
         if (NULL == grent) {perror("gid not in db"); exit(1);}
+
         subid_range_t uidrange, gidrange;
-        
-        if (-1 == fullmap_find(pwent->pw_uid, pwent->pw_name, "/etc/subuid", &uidrange) ||
-            -1 == fullmap_find(grent->gr_gid, grent->gr_name, "/etc/subgid", &gidrange)) {
-                fatal("oh no\n")
-                return -1;
-        }
-        
+        uidrange = getidrange(pwent->pw_uid, pwent->pw_name, "/etc/subuid");
+        gidrange = getidrange(grent->gr_gid, grent->gr_name, "/etc/subgid");
+
         fullmap_run(uidrange, gidrange);
         return 0;
 }
