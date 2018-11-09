@@ -6,10 +6,10 @@
 #define IDX(buffer, index) buffer[(size_t)index & IDX_MASK(buffer)]
 #define IDX_INDEX(buffer) buffer[IDX_SIZE(buffer)]
 #define IDX_RESET(buffer) {IDX_INDEX(buffer) = 0;}
-#define IDX_PUSH(buffer, element) {buffer[IDX_INDEX(buffer)++] = element;}
+#define IDX_PUSH(buffer, element) {IDX_NEXT(buffer) = element;}
 #define IDX_POP(buffer) buffer[IDX_SIZE(buffer)]--;
 #define IDX_CURRENT(buffer) buffer[IDX_INDEX(buffer)]
-#define IDX_NEXT(buffer) IDX_CURRENT(buffer)++
+#define IDX_NEXT(buffer) buffer[IDX_INDEX(buffer)++]
 
 
 
@@ -18,7 +18,7 @@ int main() {
         IDX_RESET(a)
 
         for (int i=0; i <= 14; i++){
-	        IDX_PUSH(a, i)
+	        IDX_PUSH(a, i+10)
         }
         
         IDX_RESET(a)
