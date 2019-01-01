@@ -1,3 +1,5 @@
+# DEVELOPMENT MOVED OUT IN FAVOR OF: https://github.com/ihucos/bchroot
+
 # glaze
 Standalone containers / Universal distribution packages
 
